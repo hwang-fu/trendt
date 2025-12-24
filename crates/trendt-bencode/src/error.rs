@@ -1,6 +1,6 @@
 use std::fmt;
 
-use serde::de;
+use serde::{de, ser};
 
 #[derive(Debug)]
 pub enum Error {
@@ -36,6 +36,12 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl de::Error for Error {
+    fn custom<T: std::fmt::Display>(msg: T) -> Self {
+        Error::Message(msg.to_string())
+    }
+}
+
+impl ser::Error for Error {
     fn custom<T: std::fmt::Display>(msg: T) -> Self {
         Error::Message(msg.to_string())
     }
