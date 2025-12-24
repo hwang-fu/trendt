@@ -140,12 +140,46 @@ impl<'a> Decoder<'a> {
 
     /// Decode a dictionary: d<pairs>e
     fn decode_dict(&mut self) -> Result<Value> {
-        todo!()
+        use std::collections::BTreeMap;
+
+        // Expect opening 'd'
+        self.expect(b'd')?;
+
+        let mut map = BTreeMap::new();
+        let mut last_key: Option<Vec<u8>> = None;
+
+        // Read key-value pairs until 'e'
+        while self.peek()? != b'e' {
+            // Keys must be byte strings
+            if !self.peek()?.is_ascii_digit() {
+                return Err(Error::InvalidDictKey);
+            }
+
+            let key = self.decode_byte_string()?;
+
+            // Keys must be sorted
+            if last_key.as_ref().is_some_and(|prev| key <= *prev) {
+                return Err(Error::UnsortedDictKeys);
+            }
+            last_key = Some(key.clone());
+
+            // Decode the value
+            let value = self.decode_value()?;
+
+            map.insert(key, value);
+        }
+
+        // Expect closing 'e'
+        self.expect(b'e')?;
+
+        Ok(Value::Dict(map))
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use super::*;
 
     #[test]
@@ -228,5 +262,38 @@ mod tests {
         let mut decoder = Decoder::new(b"lli1eee");
         let expected = Value::List(vec![Value::List(vec![Value::Integer(1)])]);
         assert_eq!(decoder.decode_value().unwrap(), expected);
+    }
+
+    #[test]
+    fn decode_empty_dict() {
+        let mut decoder = Decoder::new(b"de");
+        assert_eq!(
+            decoder.decode_value().unwrap(),
+            Value::Dict(BTreeMap::new())
+        );
+    }
+
+    #[test]
+    fn decode_dict_simple() {
+        let mut decoder = Decoder::new(b"d3:fooi1ee");
+        let mut expected = BTreeMap::new();
+        expected.insert(b"foo".to_vec(), Value::Integer(1));
+        assert_eq!(decoder.decode_value().unwrap(), Value::Dict(expected));
+    }
+
+    #[test]
+    fn decode_dict_multiple_keys() {
+        let mut decoder = Decoder::new(b"d3:bar4:spam3:fooi42ee");
+        let mut expected = BTreeMap::new();
+        expected.insert(b"bar".to_vec(), Value::ByteString(b"spam".to_vec()));
+        expected.insert(b"foo".to_vec(), Value::Integer(42));
+        assert_eq!(decoder.decode_value().unwrap(), Value::Dict(expected));
+    }
+
+    #[test]
+    fn reject_unsorted_dict_keys() {
+        // "foo" comes before "bar" but "bar" < "foo" alphabetically - should fail
+        let mut decoder = Decoder::new(b"d3:fooi1e3:bari2ee");
+        assert!(decoder.decode_value().is_err());
     }
 }
