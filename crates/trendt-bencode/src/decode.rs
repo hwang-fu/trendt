@@ -176,6 +176,12 @@ impl<'a> Decoder<'a> {
     }
 }
 
+/// Convenience function to decode bencode bytes to a Value
+pub fn decode(input: &[u8]) -> Result<Value> {
+    let mut decoder = Decoder::new(input);
+    decoder.decode_value()
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
