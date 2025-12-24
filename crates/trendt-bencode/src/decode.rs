@@ -108,6 +108,40 @@ impl<'a> Decoder<'a> {
 
         Ok(data)
     }
+
+    /// Decode any bencode value
+    pub fn decode_value(&mut self) -> Result<Value> {
+        match self.peek()? {
+            b'i' => Ok(Value::Integer(self.decode_integer()?)),
+            b'l' => self.decode_list(),
+            b'd' => self.decode_dict(),
+            b'0'..=b'9' => Ok(Value::ByteString(self.decode_byte_string()?)),
+            byte => Err(Error::InvalidCharacter(byte)),
+        }
+    }
+
+    /// Decode a list: l<items>e
+    fn decode_list(&mut self) -> Result<Value> {
+        // Expect opening 'l'
+        self.expect(b'l')?;
+
+        let mut items = Vec::new();
+
+        // Read items until 'e'
+        while self.peek()? != b'e' {
+            items.push(self.decode_value()?);
+        }
+
+        // Expect closing 'e'
+        self.expect(b'e')?;
+
+        Ok(Value::List(items))
+    }
+
+    /// Decode a dictionary: d<pairs>e
+    fn decode_dict(&mut self) -> Result<Value> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -160,5 +194,39 @@ mod tests {
     fn decode_byte_string_with_binary() {
         let mut decoder = Decoder::new(b"3:\x00\x01\x02");
         assert_eq!(decoder.decode_byte_string().unwrap(), vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn decode_empty_list() {
+        let mut decoder = Decoder::new(b"le");
+        assert_eq!(decoder.decode_value().unwrap(), Value::List(vec![]));
+    }
+
+    #[test]
+    fn decode_list_of_integers() {
+        let mut decoder = Decoder::new(b"li1ei2ei3ee");
+        let expected = Value::List(vec![
+            Value::Integer(1),
+            Value::Integer(2),
+            Value::Integer(3),
+        ]);
+        assert_eq!(decoder.decode_value().unwrap(), expected);
+    }
+
+    #[test]
+    fn decode_list_mixed() {
+        let mut decoder = Decoder::new(b"l4:spami42ee");
+        let expected = Value::List(vec![
+            Value::ByteString(b"spam".to_vec()),
+            Value::Integer(42),
+        ]);
+        assert_eq!(decoder.decode_value().unwrap(), expected);
+    }
+
+    #[test]
+    fn decode_nested_list() {
+        let mut decoder = Decoder::new(b"lli1eee");
+        let expected = Value::List(vec![Value::List(vec![Value::Integer(1)])]);
+        assert_eq!(decoder.decode_value().unwrap(), expected);
     }
 }
