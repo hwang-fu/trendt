@@ -1,5 +1,7 @@
 use std::fmt;
 
+use serde::de;
+
 #[derive(Debug)]
 pub enum Error {
     /// Unexpected end of input
@@ -12,6 +14,9 @@ pub enum Error {
     InvalidDictKey,
     /// Dictionary keys must be sorted
     UnsortedDictKeys,
+
+    /// Custom message from serde
+    Message(String),
 }
 
 impl fmt::Display for Error {
@@ -22,10 +27,18 @@ impl fmt::Display for Error {
             Error::InvalidInteger => write!(f, "invalid integer format"),
             Error::InvalidDictKey => write!(f, "dictionary keys must be byte strings"),
             Error::UnsortedDictKeys => write!(f, "dictionary keys must be sorted"),
+
+            Error::Message(msg) => write!(f, "{}", msg),
         }
     }
 }
 
 impl std::error::Error for Error {}
+
+impl de::Error for Error {
+    fn custom<T: std::fmt::Display>(msg: T) -> Self {
+        Error::Message(msg.to_string())
+    }
+}
 
 pub type Result<T> = std::result::Result<T, Error>;
