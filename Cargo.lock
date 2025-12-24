@@ -36,3 +36,6 @@ dependencies = [
 [[package]]
 name = "trendt-tracker"
 version = "0.1.0"
+dependencies = [
+ "trendt-bencode",
+]
