@@ -5,6 +5,9 @@ version = 4
 [[package]]
 name = "trendt"
 version = "0.1.0"
+dependencies = [
+ "trendt-core",
+]
 
 [[package]]
 name = "trendt-bencode"
@@ -13,6 +16,11 @@ version = "0.1.0"
 [[package]]
 name = "trendt-core"
 version = "0.1.0"
+dependencies = [
+ "trendt-peer",
+ "trendt-torrent",
+ "trendt-tracker",
+]
 
 [[package]]
 name = "trendt-peer"
@@ -21,6 +29,9 @@ version = "0.1.0"
 [[package]]
 name = "trendt-torrent"
 version = "0.1.0"
+dependencies = [
+ "trendt-bencode",
+]
 
 [[package]]
 name = "trendt-tracker"

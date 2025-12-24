@@ -1,5 +1,11 @@
 [workspace]
-members = ["crates/trendt-bencode", "crates/trendt-core", "crates/trendt-peer", "crates/trendt-torrent", "crates/trendt-tracker"]
+members = [
+    "crates/trendt-bencode",
+    "crates/trendt-core",
+    "crates/trendt-peer",
+    "crates/trendt-torrent",
+    "crates/trendt-tracker",
+]
 resolver = "2"
 
 [package]
@@ -8,3 +14,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+trendt-core = { path = "crates/trendt-core" }
