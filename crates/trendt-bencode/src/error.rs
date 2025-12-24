@@ -8,6 +8,10 @@ pub enum Error {
     InvalidCharacter(u8),
     /// Invalid integer format
     InvalidInteger,
+    /// Dictionary keys must be byte strings
+    InvalidDictKey,
+    /// Dictionary keys must be sorted
+    UnsortedDictKeys,
 }
 
 impl fmt::Display for Error {
@@ -16,6 +20,8 @@ impl fmt::Display for Error {
             Error::UnexpectedEof => write!(f, "unexpected end of input"),
             Error::InvalidCharacter(c) => write!(f, "invalid character: {}", *c as char),
             Error::InvalidInteger => write!(f, "invalid integer format"),
+            Error::InvalidDictKey => write!(f, "dictionary keys must be byte strings"),
+            Error::UnsortedDictKeys => write!(f, "dictionary keys must be sorted"),
         }
     }
 }
