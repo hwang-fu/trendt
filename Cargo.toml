@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/trendt-bencode"]
+members = ["crates/trendt-bencode", "crates/trendt-core", "crates/trendt-peer", "crates/trendt-torrent", "crates/trendt-tracker"]
 resolver = "2"
 
 [package]
