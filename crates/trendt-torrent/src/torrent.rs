@@ -19,5 +19,4 @@ pub struct Torrent {
     /// Optional: client that created this torrent
     #[serde(rename = "created by")]
     pub created_by: Option<String>,
-    // We'll add the `info` field in subphase 3.2
 }
