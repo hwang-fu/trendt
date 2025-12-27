@@ -1,5 +1,8 @@
 use serde::Deserialize;
 
+use std::fs;
+use std::path::Path;
+
 #[derive(Debug, Deserialize)]
 pub struct Torrent {
     /// Primary tracker URL
@@ -49,4 +52,29 @@ pub struct Info {
 
     /// File size in bytes (single-file torrents only)
     pub length: Option<i64>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_debian_torrent() {
+        // CARGO_MANIFEST_DIR points to the workspace root during tests
+        let manifest_dir = env!("CARGO_MANIFEST_DIR");
+        let torrent_path = format!("{}/../../tests/fixtures/debian.torrent", manifest_dir);
+
+        let torrent = Torrent::from_file(&torrent_path).expect("failed to parse torrent");
+
+        println!("Name: {}", torrent.info.name);
+        println!("Piece length: {}", torrent.info.piece_length);
+        println!(
+            "Pieces: {} bytes ({} pieces)",
+            torrent.info.pieces.len(),
+            torrent.info.pieces.len() / 20
+        );
+
+        assert!(torrent.info.name.contains("debian"));
+        assert!(torrent.info.length.is_some());
+    }
 }
