@@ -20,3 +20,20 @@ pub struct Torrent {
     #[serde(rename = "created by")]
     pub created_by: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct Info {
+    /// File or directory name
+    pub name: String,
+
+    /// Number of bytes per piece
+    #[serde(rename = "piece length")]
+    pub piece_length: i64,
+
+    /// Concatenated SHA-1 hashes (20 bytes each)
+    #[serde(with = "serde_bytes")]
+    pub pieces: Vec<u8>,
+
+    /// File size in bytes (single-file torrents only)
+    pub length: Option<i64>,
+}
