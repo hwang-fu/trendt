@@ -19,6 +19,9 @@ pub struct Torrent {
     /// Optional: client that created this torrent
     #[serde(rename = "created by")]
     pub created_by: Option<String>,
+
+    /// File metadata and piece hashes
+    pub info: Info,
 }
 
 #[derive(Debug, Deserialize)]
