@@ -24,6 +24,7 @@ pub struct Torrent {
     pub info: Info,
 }
 
+/// The info dictionary - contains file metadata and piece hashes
 #[derive(Debug, Deserialize)]
 pub struct Info {
     /// File or directory name
