@@ -24,6 +24,15 @@ pub struct Torrent {
     pub info: Info,
 }
 
+impl Torrent {
+    /// Load and parse a .torrent file
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, trendt_bencode::Error> {
+        let bytes = fs::read(path)
+            .map_err(|e| trendt_bencode::Error::Message(format!("failed to read file: {}", e)))?;
+        trendt_bencode::from_bytes(&bytes)
+    }
+}
+
 /// The info dictionary - contains file metadata and piece hashes
 #[derive(Debug, Deserialize)]
 pub struct Info {
